@@ -2,8 +2,12 @@ package frc.sim;
 
 import org.photonvision.SimVisionSystem;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Transform2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
@@ -25,21 +29,21 @@ import frc.robot.Constants;
 public class DrivetrainSim {
 
   // Simulated Sensors
-  AnalogGyroSim m_gyroSim = new AnalogGyroSim(Constants.kGyroPin);
-  EncoderSim m_leftEncoderSim = EncoderSim.createForChannel(Constants.kDtLeftEncoderPinA);
-  EncoderSim m_rightEncoderSim = EncoderSim.createForChannel(Constants.kDtRightEncoderPinA);
+  AnalogGyroSim gyroSim = new AnalogGyroSim(Constants.kGyroPin);
+  EncoderSim leftEncoderSim = EncoderSim.createForChannel(Constants.kDtLeftEncoderPinA);
+  EncoderSim rightEncoderSim = EncoderSim.createForChannel(Constants.kDtRightEncoderPinA);
  
   // Simulated Motor Controllers
-  PWMSim m_leftLeader = new PWMSim(Constants.kDtLeftLeaderPin);
-  PWMSim m_leftFollower = new PWMSim(Constants.kDtLeftFollowerPin);
-  PWMSim m_rightLeader = new PWMSim(Constants.kDtRightLeaderPin);
-  PWMSim m_rightFollower = new PWMSim(Constants.kDtRightFollowerPin);
+  PWMSim leftLeader = new PWMSim(Constants.kDtLeftLeaderPin);
+  PWMSim leftFollower = new PWMSim(Constants.kDtLeftFollowerPin);
+  PWMSim rightLeader = new PWMSim(Constants.kDtRightLeaderPin);
+  PWMSim rightFollower = new PWMSim(Constants.kDtRightFollowerPin);
 
   // Simulation Physics
   // Configure these to match your drivetrain's physical dimensions
   // and characterization results.
-  LinearSystem<N2, N2, N2> m_drivetrainSystem = LinearSystemId.identifyDrivetrainSystem(1.98, 0.2, 1.5, 0.3);
-  DifferentialDrivetrainSim m_drivetrainSimulator = new DifferentialDrivetrainSim(m_drivetrainSystem, DCMotor.getCIM(2), 8, Constants.kTrackWidth, Constants.kWheelRadius, null);
+  LinearSystem<N2, N2, N2> drivetrainSystem = LinearSystemId.identifyDrivetrainSystem(1.98, 0.2, 1.5, 0.3);
+  DifferentialDrivetrainSim drivetrainSimulator = new DifferentialDrivetrainSim(drivetrainSystem, DCMotor.getCIM(2), 8, Constants.kTrackWidth, Constants.kWheelRadius, null);
 
   // Simulated Vision System.
   // Configure these to match your PhotonVision Camera,
@@ -73,28 +77,34 @@ public class DrivetrainSim {
    * of robot physics forward by a single 20ms step.
    */
   public void update(){
-    // Roughly model the effect of leader and follower motor pushing on the same gearbox.
-    // Note if the software is incorrect and drives them against each other, speed will be 
-    // roughly matching the physical situation, but current draw will _not_ be accurate.
-    double leftMotorCmd = (m_leftLeader.getSpeed() + m_leftFollower.getSpeed())/2.0;
-    double rightMotorCmd = (m_rightLeader.getSpeed() + m_rightFollower.getSpeed())/2.0;
 
+    double leftMotorCmd = 0;
+    double rightMotorCmd = 0;
+
+    if(DriverStation.getInstance().isEnabled() && !RobotController.isBrownedOut()){
+        // If the motor controllers are enabled...
+        // Roughly model the effect of leader and follower motor pushing on the same gearbox.
+        // Note if the software is incorrect and drives them against each other, speed will be 
+        // roughly matching the physical situation, but current draw will _not_ be accurate.
+        leftMotorCmd = (leftLeader.getSpeed() + leftFollower.getSpeed())/2.0;
+        rightMotorCmd = (rightLeader.getSpeed() + rightFollower.getSpeed())/2.0;
+    }
 
     // Update the physics simulation
-    m_drivetrainSimulator.setInputs(
+    drivetrainSimulator.setInputs(
         leftMotorCmd * RobotController.getInputVoltage(),
         -rightMotorCmd * RobotController.getInputVoltage());
-    m_drivetrainSimulator.update(0.02);
+    drivetrainSimulator.update(0.02);
 
     // Update our sensors based on the simulated motion of the robot
-    m_leftEncoderSim.setDistance((m_drivetrainSimulator.getLeftPositionMeters()));
-    m_leftEncoderSim.setRate((m_drivetrainSimulator.getLeftVelocityMetersPerSecond()));
-    m_rightEncoderSim.setDistance((m_drivetrainSimulator.getRightPositionMeters()));
-    m_rightEncoderSim.setRate((m_drivetrainSimulator.getRightVelocityMetersPerSecond()));
-    m_gyroSim.setAngle(-m_drivetrainSimulator.getHeading().getDegrees()); // Gyros have an inverted reference frame for angles, so multiply by -1.0;
+    leftEncoderSim.setDistance((drivetrainSimulator.getLeftPositionMeters()));
+    leftEncoderSim.setRate((drivetrainSimulator.getLeftVelocityMetersPerSecond()));
+    rightEncoderSim.setDistance((drivetrainSimulator.getRightPositionMeters()));
+    rightEncoderSim.setRate((drivetrainSimulator.getRightVelocityMetersPerSecond()));
+    gyroSim.setAngle(-drivetrainSimulator.getHeading().getDegrees()); // Gyros have an inverted reference frame for angles, so multiply by -1.0;
 
     // Update PhotonVision based on our new robot position.
-    simVision.processFrame(m_drivetrainSimulator.getPose());
+    simVision.processFrame(drivetrainSimulator.getPose());
 
   }
 
@@ -106,15 +116,27 @@ public class DrivetrainSim {
    * @param pose
    */
   public void resetPose(Pose2d pose){
-    m_drivetrainSimulator.setPose(pose);
+    drivetrainSimulator.setPose(pose);
   }
 
   /**
    * @return The simulated robot's position, in meters.
    */
   public Pose2d getCurPose(){
-      return m_drivetrainSimulator.getPose();
+      return drivetrainSimulator.getPose();
   }
   
+  /**
+   * For testing purposes only!
+   * Applies an unmodeled, undetected offset to the pose
+   * Similar to if you magically kicked your robot to the side in a way
+   * the encoders and gyro didn't measure. 
+   * 
+   * This distrubance should be corrected for once a vision target is in view.
+   */
+  public void applyKick(){
+    Pose2d newPose = drivetrainSimulator.getPose().transformBy(new Transform2d( new Translation2d(0, 0.5), new Rotation2d()));
+    drivetrainSimulator.setPose(newPose);
+  }
     
 }

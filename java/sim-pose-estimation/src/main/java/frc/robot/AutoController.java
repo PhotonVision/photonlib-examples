@@ -19,11 +19,11 @@ import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
  */
 public class AutoController {
     
-    private Trajectory m_trajectory;
+    private Trajectory trajectory;
 
-    private RamseteController m_ramsete = new RamseteController();
+    private RamseteController ramsete = new RamseteController();
 
-    private Timer m_timer = new Timer();
+    private Timer timer = new Timer();
 
     boolean isRunning = false;
 
@@ -32,7 +32,7 @@ public class AutoController {
     public AutoController(){
 
         // Change this trajectory if you need the robot to follow different paths.
-        m_trajectory =
+        trajectory =
         TrajectoryGenerator.generateTrajectory(
             new Pose2d(2, 2, new Rotation2d()),
             List.of(),
@@ -44,15 +44,15 @@ public class AutoController {
      * @return The starting (initial) pose of the currently-active trajectory
      */
     public Pose2d getInitialPose(){
-        return m_trajectory.getInitialPose();
+        return trajectory.getInitialPose();
     }
 
     /**
      * Starts the controller running. Call this at the start of autonomous
      */
     public void startPath(){
-        m_timer.reset();
-        m_timer.start();
+        timer.reset();
+        timer.start();
         isRunning = true;
 
     }
@@ -62,7 +62,7 @@ public class AutoController {
      */
     public void stopPath(){
         isRunning = false;
-        m_timer.reset();
+        timer.reset();
     }
 
     /**
@@ -75,13 +75,13 @@ public class AutoController {
     public ChassisSpeeds getCurMotorCmds( Pose2d curEstPose ){
         
         if(isRunning){
-            double elapsed = m_timer.get();
-            desiredDtState = m_trajectory.sample(elapsed);
+            double elapsed = timer.get();
+            desiredDtState = trajectory.sample(elapsed);
         } else {
             desiredDtState = new Trajectory.State();
         }
 
-        return m_ramsete.calculate(curEstPose, desiredDtState);
+        return ramsete.calculate(curEstPose, desiredDtState);
     }
 
     /**

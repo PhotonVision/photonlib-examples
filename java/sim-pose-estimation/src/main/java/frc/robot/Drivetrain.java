@@ -23,44 +23,44 @@ public class Drivetrain {
 
 
   // PWM motor controller output definitions
-  PWMVictorSPX m_leftLeader = new PWMVictorSPX(Constants.kDtLeftLeaderPin);
-  PWMVictorSPX m_leftFollower = new PWMVictorSPX(Constants.kDtLeftFollowerPin);
-  PWMVictorSPX m_rightLeader = new PWMVictorSPX(Constants.kDtRightLeaderPin);
-  PWMVictorSPX m_rightFollower = new PWMVictorSPX(Constants.kDtRightFollowerPin);
+  PWMVictorSPX leftLeader = new PWMVictorSPX(Constants.kDtLeftLeaderPin);
+  PWMVictorSPX leftFollower = new PWMVictorSPX(Constants.kDtLeftFollowerPin);
+  PWMVictorSPX rightLeader = new PWMVictorSPX(Constants.kDtRightLeaderPin);
+  PWMVictorSPX rightFollower = new PWMVictorSPX(Constants.kDtRightFollowerPin);
 
-  SpeedControllerGroup m_leftGroup = new SpeedControllerGroup(m_leftLeader, m_leftFollower);
-  SpeedControllerGroup m_rightGroup = new SpeedControllerGroup(m_rightLeader, m_rightFollower);
+  SpeedControllerGroup leftGroup = new SpeedControllerGroup(leftLeader, leftFollower);
+  SpeedControllerGroup rightGroup = new SpeedControllerGroup(rightLeader, rightFollower);
 
   // Drivetrain wheel speed sensors
   // Used both for speed control and pose estimation.
-  Encoder m_leftEncoder = new Encoder(Constants.kDtLeftEncoderPinA, Constants.kDtLeftEncoderPinB);
-  Encoder m_rightEncoder = new Encoder(Constants.kDtRightEncoderPinA, Constants.kDtRightEncoderPinB);
+  Encoder leftEncoder = new Encoder(Constants.kDtLeftEncoderPinA, Constants.kDtLeftEncoderPinB);
+  Encoder rightEncoder = new Encoder(Constants.kDtRightEncoderPinA, Constants.kDtRightEncoderPinB);
 
   // Drivetrain Pose Estimation
   DrivetrainPoseEstimator poseEst = new DrivetrainPoseEstimator();
 
   // Kinematics - defines the physical size and shape of the drivetrain, which is required to convert from
   // chassis speed commands to wheel speed commands.
-  DifferentialDriveKinematics m_kinematics =
+  DifferentialDriveKinematics kinematics =
       new DifferentialDriveKinematics(Constants.kTrackWidth);
 
   // Closed-loop PIDF controllers for servoing each side of the drivetrain to a specific speed.
   // Gains are for example purposes only - must be determined for your own robot!
-  SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(1, 3);
-  PIDController m_leftPIDController = new PIDController(8.5, 0, 0);
-  PIDController m_rightPIDController = new PIDController(8.5, 0, 0);
+  SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(1, 3);
+  PIDController leftPIDController = new PIDController(8.5, 0, 0);
+  PIDController rightPIDController = new PIDController(8.5, 0, 0);
 
   public Drivetrain() {
     // Set the distance per pulse for the drive encoders. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
-    m_leftEncoder.setDistancePerPulse(2 * Math.PI * Constants.kWheelRadius / Constants.kEncoderResolution);
-    m_rightEncoder.setDistancePerPulse(2 * Math.PI * Constants.kWheelRadius / Constants.kEncoderResolution);
+    leftEncoder.setDistancePerPulse(2 * Math.PI * Constants.kWheelRadius / Constants.kEncoderResolution);
+    rightEncoder.setDistancePerPulse(2 * Math.PI * Constants.kWheelRadius / Constants.kEncoderResolution);
 
-    m_leftEncoder.reset();
-    m_rightEncoder.reset();
+    leftEncoder.reset();
+    rightEncoder.reset();
 
-    m_rightGroup.setInverted(true);
+    rightGroup.setInverted(true);
 
   }
 
@@ -72,24 +72,22 @@ public class Drivetrain {
    */
   public void drive(double xSpeed, double rot) {
     // Convert our fwd/rev and rotate commands to wheel speed commands
-    DifferentialDriveWheelSpeeds speeds = m_kinematics.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0, rot));
+    DifferentialDriveWheelSpeeds speeds = kinematics.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0, rot));
     
     // Calculate the feedback (PID) portion of our motor command, based on desired wheel speed
-    var leftOutput =
-        m_leftPIDController.calculate(m_leftEncoder.getRate(), speeds.leftMetersPerSecond);
-    var rightOutput =
-        m_rightPIDController.calculate(m_rightEncoder.getRate(), speeds.rightMetersPerSecond);
+    var leftOutput = leftPIDController.calculate(leftEncoder.getRate(), speeds.leftMetersPerSecond);
+    var rightOutput = rightPIDController.calculate(rightEncoder.getRate(), speeds.rightMetersPerSecond);
 
     // Calculate the feedforward (F) portion of our motor command, based on desired wheel speed
-    var leftFeedforward = m_feedforward.calculate(speeds.leftMetersPerSecond);
-    var rightFeedforward = m_feedforward.calculate(speeds.rightMetersPerSecond);
+    var leftFeedforward = feedforward.calculate(speeds.leftMetersPerSecond);
+    var rightFeedforward = feedforward.calculate(speeds.rightMetersPerSecond);
 
     // Update the motor controllers with our new motor commands
-    m_leftGroup.setVoltage(leftOutput + leftFeedforward);
-    m_rightGroup.setVoltage(rightOutput + rightFeedforward);
+    leftGroup.setVoltage(leftOutput + leftFeedforward);
+    rightGroup.setVoltage(rightOutput + rightFeedforward);
 
     // Update the pose estimator with the most recent sensor readings.
-    poseEst.update(new DifferentialDriveWheelSpeeds(m_leftEncoder.getRate(), m_rightEncoder.getRate()), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
+    poseEst.update(new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate()), leftEncoder.getDistance(), rightEncoder.getDistance());
   }
 
   /**
@@ -99,8 +97,8 @@ public class Drivetrain {
    * @param pose
    */
   public void resetOdometry(Pose2d pose) {
-    m_leftEncoder.reset();
-    m_rightEncoder.reset();
+    leftEncoder.reset();
+    rightEncoder.reset();
     poseEst.resetToPose(pose);
   }
 

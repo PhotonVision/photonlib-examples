@@ -25,7 +25,7 @@ import edu.wpi.first.wpiutil.math.numbers.N5;
 public class DrivetrainPoseEstimator {
 
     //Sensors used as part of the Pose Estimation
-    private final AnalogGyro m_gyro = new AnalogGyro(Constants.kGyroPin);
+    private final AnalogGyro gyro = new AnalogGyro(Constants.kGyroPin);
     private PhotonCamera cam = new PhotonCamera(Constants.kCamName);
     // Note - drivetrain encoders are also used. The Drivetrain class must pass us the relevant readings.
 
@@ -38,7 +38,7 @@ public class DrivetrainPoseEstimator {
     Matrix<N3, N1>  visionMeasurementStdDevs = VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.1));
 
     private final DifferentialDrivePoseEstimator m_poseEstimator = 
-    new DifferentialDrivePoseEstimator(m_gyro.getRotation2d(), new Pose2d(), 
+    new DifferentialDrivePoseEstimator(gyro.getRotation2d(), new Pose2d(), 
     stateStdDevs, 
     localMeasurementStdDevs, 
     visionMeasurementStdDevs);
@@ -56,17 +56,17 @@ public class DrivetrainPoseEstimator {
      */
     public void update(DifferentialDriveWheelSpeeds actWheelSpeeds, double leftDist, double rightDist){
 
-        m_poseEstimator.update( m_gyro.getRotation2d(),
+        m_poseEstimator.update( gyro.getRotation2d(),
         actWheelSpeeds, 
         leftDist, rightDist);
 
         var res = cam.getLatestResult();   
-        //if(res.hasTargets()){
-        //    double imageCaptureTime = Timer.getFPGATimestamp() - res.getLatencyMillis();
-        //    Transform2d camToTargetTrans = res.getBestTarget().getCameraToTarget();
-        //    Pose2d camPose = Constants.kFarTargetPose.transformBy(camToTargetTrans.inverse());
-        //    m_poseEstimator.addVisionMeasurement( camPose.transformBy(Constants.kCameraToRobot), imageCaptureTime);
-        //}
+        if(res.hasTargets()){
+            double imageCaptureTime = Timer.getFPGATimestamp() - res.getLatencyMillis();
+            Transform2d camToTargetTrans = res.getBestTarget().getCameraToTarget();
+            Pose2d camPose = Constants.kFarTargetPose.transformBy(camToTargetTrans.inverse());
+            m_poseEstimator.addVisionMeasurement( camPose.transformBy(Constants.kCameraToRobot), imageCaptureTime);
+        }
     }
 
     /**
@@ -76,7 +76,7 @@ public class DrivetrainPoseEstimator {
      * @param pose
      */
     public void resetToPose(Pose2d pose){
-        m_poseEstimator.resetPosition(pose, m_gyro.getRotation2d());
+        m_poseEstimator.resetPosition(pose, gyro.getRotation2d());
     }
 
     /**
