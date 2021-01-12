@@ -15,12 +15,11 @@ import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 
 /**
- * Implements a controller for the drivetrain.
- * Converts a set of chassis motion commands into motor controller PWM values
- * which attempt to speed up or slow down the wheels to match the desired speed.
+ * Implements a controller for the drivetrain. Converts a set of chassis motion
+ * commands into motor controller PWM values which attempt to speed up or slow
+ * down the wheels to match the desired speed.
  */
 public class Drivetrain {
-
 
   // PWM motor controller output definitions
   PWMVictorSPX leftLeader = new PWMVictorSPX(Constants.kDtLeftLeaderPin);
@@ -39,12 +38,13 @@ public class Drivetrain {
   // Drivetrain Pose Estimation
   DrivetrainPoseEstimator poseEst = new DrivetrainPoseEstimator();
 
-  // Kinematics - defines the physical size and shape of the drivetrain, which is required to convert from
+  // Kinematics - defines the physical size and shape of the drivetrain, which is
+  // required to convert from
   // chassis speed commands to wheel speed commands.
-  DifferentialDriveKinematics kinematics =
-      new DifferentialDriveKinematics(Constants.kTrackWidth);
+  DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Constants.kTrackWidth);
 
-  // Closed-loop PIDF controllers for servoing each side of the drivetrain to a specific speed.
+  // Closed-loop PIDF controllers for servoing each side of the drivetrain to a
+  // specific speed.
   // Gains are for example purposes only - must be determined for your own robot!
   SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(1, 3);
   PIDController leftPIDController = new PIDController(8.5, 0, 0);
@@ -65,20 +65,25 @@ public class Drivetrain {
   }
 
   /**
-   * Given a set of chassis (fwd/rev + rotate) speed commands, perform all periodic tasks to 
-   * assign new outputs to the motor controllers.
-   * @param xSpeed Desired chassis Forward or Reverse speed (in meters/sec). Positive is forward.
-   * @param rot Desired chassis rotation speed in radians/sec. Positive is counter-clockwise.
+   * Given a set of chassis (fwd/rev + rotate) speed commands, perform all
+   * periodic tasks to assign new outputs to the motor controllers.
+   * 
+   * @param xSpeed Desired chassis Forward or Reverse speed (in meters/sec).
+   *               Positive is forward.
+   * @param rot    Desired chassis rotation speed in radians/sec. Positive is
+   *               counter-clockwise.
    */
   public void drive(double xSpeed, double rot) {
     // Convert our fwd/rev and rotate commands to wheel speed commands
     DifferentialDriveWheelSpeeds speeds = kinematics.toWheelSpeeds(new ChassisSpeeds(xSpeed, 0, rot));
-    
-    // Calculate the feedback (PID) portion of our motor command, based on desired wheel speed
+
+    // Calculate the feedback (PID) portion of our motor command, based on desired
+    // wheel speed
     var leftOutput = leftPIDController.calculate(leftEncoder.getRate(), speeds.leftMetersPerSecond);
     var rightOutput = rightPIDController.calculate(rightEncoder.getRate(), speeds.rightMetersPerSecond);
 
-    // Calculate the feedforward (F) portion of our motor command, based on desired wheel speed
+    // Calculate the feedforward (F) portion of our motor command, based on desired
+    // wheel speed
     var leftFeedforward = feedforward.calculate(speeds.leftMetersPerSecond);
     var rightFeedforward = feedforward.calculate(speeds.rightMetersPerSecond);
 
@@ -87,13 +92,16 @@ public class Drivetrain {
     rightGroup.setVoltage(rightOutput + rightFeedforward);
 
     // Update the pose estimator with the most recent sensor readings.
-    poseEst.update(new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate()), leftEncoder.getDistance(), rightEncoder.getDistance());
+    poseEst.update(new DifferentialDriveWheelSpeeds(leftEncoder.getRate(), rightEncoder.getRate()),
+        leftEncoder.getDistance(), rightEncoder.getDistance());
   }
 
   /**
-   * Force the pose estimator and all sensors to a particular pose. This is useful for 
-   * indicating to the software when you have manually moved your robot in a particular 
-   * position on the field (EX: when you place it on the field at the start of the match).
+   * Force the pose estimator and all sensors to a particular pose. This is useful
+   * for indicating to the software when you have manually moved your robot in a
+   * particular position on the field (EX: when you place it on the field at the
+   * start of the match).
+   * 
    * @param pose
    */
   public void resetOdometry(Pose2d pose) {

@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import frc.sim.DrivetrainSim;
 
-
 public class Robot extends TimedRobot {
 
   AutoController autoCtrl = new AutoController();
@@ -48,7 +47,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     pt.setEstimatedPose(dt.getCtrlsPoseEstimate());
-    pt.update();  
+    pt.update();
   }
 
   @Override
@@ -58,15 +57,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void simulationPeriodic() {
-    if(opInf.getSimKickCmd()){
+    if (opInf.getSimKickCmd()) {
       dtSim.applyKick();
     }
     dtSim.update();
     pt.setActualPose(dtSim.getCurPose());
   }
 
-
-  private void resetOdometery(){
+  private void resetOdometery() {
     Pose2d startPose = autoCtrl.getInitialPose();
     dtSim.resetPose(startPose);
     dt.resetOdometry(startPose);

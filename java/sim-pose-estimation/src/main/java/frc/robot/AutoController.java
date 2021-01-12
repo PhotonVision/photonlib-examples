@@ -13,12 +13,12 @@ import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 
 /**
  * Implements logic to convert a set of desired waypoints (ie, a trajectory) and
- * the current estimate of where the robot is at (ie, the estimated Pose) into 
+ * the current estimate of where the robot is at (ie, the estimated Pose) into
  * motion commands for a drivetrain. The Ramaste controller is used to smoothly
  * move the robot from where it thinks it is to where it thinks it ought to be.
  */
 public class AutoController {
-    
+
     private Trajectory trajectory;
 
     private RamseteController ramsete = new RamseteController();
@@ -29,28 +29,24 @@ public class AutoController {
 
     Trajectory.State desiredDtState;
 
-    public AutoController(){
+    public AutoController() {
 
         // Change this trajectory if you need the robot to follow different paths.
-        trajectory =
-        TrajectoryGenerator.generateTrajectory(
-            new Pose2d(2, 2, new Rotation2d()),
-            List.of(),
-            new Pose2d(6, 4, new Rotation2d()),
-            new TrajectoryConfig(2, 2));
+        trajectory = TrajectoryGenerator.generateTrajectory(new Pose2d(2, 2, new Rotation2d()), List.of(),
+                new Pose2d(6, 4, new Rotation2d()), new TrajectoryConfig(2, 2));
     }
 
     /**
      * @return The starting (initial) pose of the currently-active trajectory
      */
-    public Pose2d getInitialPose(){
+    public Pose2d getInitialPose() {
         return trajectory.getInitialPose();
     }
 
     /**
      * Starts the controller running. Call this at the start of autonomous
      */
-    public void startPath(){
+    public void startPath() {
         timer.reset();
         timer.start();
         isRunning = true;
@@ -60,21 +56,22 @@ public class AutoController {
     /**
      * Stops the controller from generating commands
      */
-    public void stopPath(){
+    public void stopPath() {
         isRunning = false;
         timer.reset();
     }
 
     /**
-     * Given the current estimate of the robot's position, calculate drivetrain speed
-     * commands which will best-execute the active trajectory.
-     * Be sure to call `startPath()` prior to calling this method.
+     * Given the current estimate of the robot's position, calculate drivetrain
+     * speed commands which will best-execute the active trajectory. Be sure to call
+     * `startPath()` prior to calling this method.
+     * 
      * @param curEstPose Current estimate of drivetrain pose on the field
      * @return The commanded drivetrain motion
      */
-    public ChassisSpeeds getCurMotorCmds( Pose2d curEstPose ){
-        
-        if(isRunning){
+    public ChassisSpeeds getCurMotorCmds(Pose2d curEstPose) {
+
+        if (isRunning) {
             double elapsed = timer.get();
             desiredDtState = trajectory.sample(elapsed);
         } else {
@@ -85,9 +82,10 @@ public class AutoController {
     }
 
     /**
-     * @return The position which the auto controller is attempting to move the drivetrain to right now.
+     * @return The position which the auto controller is attempting to move the
+     *         drivetrain to right now.
      */
-    public Pose2d getCurPose2d(){
+    public Pose2d getCurPose2d() {
         return desiredDtState.poseMeters;
     }
 
