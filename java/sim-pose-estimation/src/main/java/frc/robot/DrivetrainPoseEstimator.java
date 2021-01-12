@@ -36,7 +36,7 @@ public class DrivetrainPoseEstimator {
     Matrix<N5, N1>  stateStdDevs  = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5), 0.05, 0.05); 
     Matrix<N3, N1>  localMeasurementStdDevs  = VecBuilder.fill(0.01,0.01,Units.degreesToRadians(0.1));
     Matrix<N3, N1>  visionMeasurementStdDevs = VecBuilder.fill(0.01, 0.01, Units.degreesToRadians(0.1));
-  
+
     private final DifferentialDrivePoseEstimator m_poseEstimator = 
     new DifferentialDrivePoseEstimator(m_gyro.getRotation2d(), new Pose2d(), 
     stateStdDevs, 
@@ -51,10 +51,11 @@ public class DrivetrainPoseEstimator {
     /**
      * Perform all periodic pose estimation tasks. 
      * @param actWheelSpeeds Current Speeds (in m/s) of the drivetrain wheels
-     * @param leftDist Distance (in m) the left wheel has traveled since the previous call to this method.
-     * @param rightDist Distance (in m) the right wheel has traveled since the previous call to this method.
+     * @param leftDist Distance (in m) the left wheel has traveled 
+     * @param rightDist Distance (in m) the right wheel has traveled 
      */
     public void update(DifferentialDriveWheelSpeeds actWheelSpeeds, double leftDist, double rightDist){
+
         m_poseEstimator.update( m_gyro.getRotation2d(),
         actWheelSpeeds, 
         leftDist, rightDist);

@@ -87,16 +87,17 @@ public class DrivetrainSim {
     m_drivetrainSimulator.update(0.02);
 
     // Update our sensors based on the simulated motion of the robot
-    m_leftEncoderSim.setDistance(m_drivetrainSimulator.getLeftPositionMeters());
-    m_leftEncoderSim.setRate(m_drivetrainSimulator.getLeftVelocityMetersPerSecond());
-    m_rightEncoderSim.setDistance(m_drivetrainSimulator.getRightPositionMeters());
-    m_rightEncoderSim.setRate(m_drivetrainSimulator.getRightVelocityMetersPerSecond());
+    m_leftEncoderSim.setDistance((m_drivetrainSimulator.getLeftPositionMeters()));
+    m_leftEncoderSim.setRate((m_drivetrainSimulator.getLeftVelocityMetersPerSecond()));
+    m_rightEncoderSim.setDistance((m_drivetrainSimulator.getRightPositionMeters()));
+    m_rightEncoderSim.setRate((m_drivetrainSimulator.getRightVelocityMetersPerSecond()));
     m_gyroSim.setAngle(-m_drivetrainSimulator.getHeading().getDegrees()); // Gyros have an inverted reference frame for angles, so multiply by -1.0;
 
     // Update PhotonVision based on our new robot position.
     simVision.processFrame(m_drivetrainSimulator.getPose());
 
   }
+
 
   /**
    * Resets the simulation back to a pre-defined pose
@@ -105,8 +106,6 @@ public class DrivetrainSim {
    * @param pose
    */
   public void resetPose(Pose2d pose){
-    m_leftEncoderSim.resetData();
-    m_rightEncoderSim.resetData();
     m_drivetrainSimulator.setPose(pose);
   }
 
