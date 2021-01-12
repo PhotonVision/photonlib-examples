@@ -20,7 +20,7 @@ public class OperatorInterface {
     public double getFwdRevSpdCmd(){
         // Get the x speed. We are inverting this because Xbox controllers return
         // negative values when we push forward.
-        return -m_speedLimiter.calculate(m_controller.getY(GenericHID.Hand.kLeft)) * Drivetrain.kMaxSpeed;
+        return -m_speedLimiter.calculate(m_controller.getY(GenericHID.Hand.kLeft)) * Constants.kMaxSpeed;
     }
 
     public double getRotateSpdCmd(){
@@ -29,7 +29,7 @@ public class OperatorInterface {
         // mathematics). Xbox controllers return positive values when you pull to
         // the right by default.
         return -m_rotLimiter.calculate(m_controller.getX(GenericHID.Hand.kRight))
-                * Drivetrain.kMaxAngularSpeed;
+                * Constants.kMaxAngularSpeed;
     }
     
 }

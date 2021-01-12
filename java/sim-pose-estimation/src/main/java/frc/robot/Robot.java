@@ -18,16 +18,13 @@ public class Robot extends TimedRobot {
 
   DrivetrainSim dtSim = new DrivetrainSim();
 
+  PoseTelemetry pt = new PoseTelemetry();
+
   @Override
   public void robotInit() {
     // Flush NetworkTables every loop. This ensures that robot pose and other values
     // are sent during every iteration.
     setNetworkTablesFlushEnabled(true);
-  }
-
-  @Override
-  public void robotPeriodic() {
-    m_drive.periodic();
   }
 
   @Override
@@ -40,20 +37,29 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     ChassisSpeeds speeds = autoCtrl.getCurMotorCmds(m_drive.getCtrlsPoseEstimate());
     m_drive.drive(speeds.vxMetersPerSecond, speeds.omegaRadiansPerSecond);
+    pt.setDesiredPose(autoCtrl.getCurPose2d());
   }
 
   @Override
-  @SuppressWarnings("LocalVariableName")
   public void teleopPeriodic() {
     m_drive.drive(opInf.getFwdRevSpdCmd(), opInf.getRotateSpdCmd());
   }
 
   @Override
-  public void simulationPeriodic() {
-    dtSim.update();
+  public void robotPeriodic() {
+    pt.setEstimatedPose(m_drive.getCtrlsPoseEstimate());
+    pt.update();  
   }
 
-  void resetOdometery(){
+
+  @Override
+  public void simulationPeriodic() {
+    dtSim.update();
+    pt.setActualPose(dtSim.getCurPose());
+  }
+
+
+  private void resetOdometery(){
     Pose2d startPose = autoCtrl.getInitialPose();
     dtSim.resetPose(startPose);
     m_drive.resetOdometry(startPose);

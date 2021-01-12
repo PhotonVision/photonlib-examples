@@ -11,6 +11,12 @@ import edu.wpi.first.wpilibj.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
 import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
 
+/**
+ * Implements logic to convert a set of desired waypoints (ie, a trajectory) and
+ * the current estimate of where the robot is at (ie, the estimated Pose) into 
+ * motion commands for a drivetrain. The Ramaste controller is used to smoothly
+ * move the robot from where it thinks it is to where it thinks it ought to be.
+ */
 public class AutoController {
     
     private Trajectory m_trajectory;
@@ -21,9 +27,11 @@ public class AutoController {
 
     boolean isRunning = false;
 
+    Trajectory.State desiredDtState;
 
     public AutoController(){
 
+        // Change this trajectory if you need the robot to follow different paths.
         m_trajectory =
         TrajectoryGenerator.generateTrajectory(
             new Pose2d(2, 2, new Rotation2d()),
@@ -32,34 +40,55 @@ public class AutoController {
             new TrajectoryConfig(2, 2));
     }
 
-
-    Pose2d getInitialPose(){
+    /**
+     * @return The starting (initial) pose of the currently-active trajectory
+     */
+    public Pose2d getInitialPose(){
         return m_trajectory.getInitialPose();
     }
 
-    void startPath(){
+    /**
+     * Starts the controller running. Call this at the start of autonomous
+     */
+    public void startPath(){
         m_timer.reset();
         m_timer.start();
         isRunning = true;
 
     }
 
-    void stopPath(){
+    /**
+     * Stops the controller from generating commands
+     */
+    public void stopPath(){
         isRunning = false;
         m_timer.reset();
     }
 
-    ChassisSpeeds getCurMotorCmds( Pose2d curEstPose ){
-        Trajectory.State reference ;
+    /**
+     * Given the current estimate of the robot's position, calculate drivetrain speed
+     * commands which will best-execute the active trajectory.
+     * Be sure to call `startPath()` prior to calling this method.
+     * @param curEstPose Current estimate of drivetrain pose on the field
+     * @return The commanded drivetrain motion
+     */
+    public ChassisSpeeds getCurMotorCmds( Pose2d curEstPose ){
         
         if(isRunning){
             double elapsed = m_timer.get();
-            reference = m_trajectory.sample(elapsed);
+            desiredDtState = m_trajectory.sample(elapsed);
         } else {
-            reference = new Trajectory.State();
+            desiredDtState = new Trajectory.State();
         }
 
-        return m_ramsete.calculate(curEstPose, reference);
+        return m_ramsete.calculate(curEstPose, desiredDtState);
+    }
+
+    /**
+     * @return The position which the auto controller is attempting to move the drivetrain to right now.
+     */
+    public Pose2d getCurPose2d(){
+        return desiredDtState.poseMeters;
     }
 
 }

@@ -6,27 +6,33 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class PoseTelemetry {
 
-    Field2d m_fieldPoseEst = new Field2d();
-    Field2d m_fieldPoseAct = new Field2d();
-    Field2d m_fieldPoseDes = new Field2d();
-
+    Field2d m_field = new Field2d();
+    
+    Pose2d actPose = new Pose2d();
+    Pose2d desPose = new Pose2d();
+    Pose2d estPose = new Pose2d();
 
     public PoseTelemetry(){
-        SmartDashboard.putData("Field_EstPose", m_fieldPoseEst);
-        SmartDashboard.putData("Field_ActPose", m_fieldPoseAct);
-        SmartDashboard.putData("Field_DesPose", m_fieldPoseDes);
+        SmartDashboard.putData("Field", m_field);
+        update();
     }
 
-    public void setActualPose(Pose2d act_in){
-        m_fieldPoseAct.setRobotPose(act_in);
+    public void update(){
+        m_field.getObject("DesPose").setPose(desPose);
+        m_field.getObject("ActPose").setPose(actPose);
+        m_field.getObject("Robot").setPose(estPose);
     }
 
-    public void setDesiredPose(Pose2d des_in){
-        m_fieldPoseDes.setRobotPose(des_in);
+    public void setActualPose(Pose2d in){
+        actPose = in;
     }
 
-    public void setEstimatedPose(Pose2d est_in){
-        m_fieldPoseEst.setRobotPose(est_in);
+    public void setDesiredPose(Pose2d in){
+        desPose = in;
+    }
+
+    public void setEstimatedPose(Pose2d in){
+        estPose = in;
     }
     
 }
