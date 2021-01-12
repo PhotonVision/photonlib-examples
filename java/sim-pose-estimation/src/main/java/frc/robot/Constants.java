@@ -54,12 +54,22 @@ public class Constants {
   public static final Transform2d kCameraToRobot = new Transform2d(new Translation2d(-0.25, 0), // in meters
       new Rotation2d());
 
-  // Definition for the opposite-alliance high goal in 2020 & 2021
-  public static final double targetHeightAboveGround = 2.3; // meters
-  public static final double targetWidth = 0.54; // meters
-  public static final double targetHeight = 0.25; // meters
-  public static final Pose2d kFarTargetPose = new Pose2d(
-      new Translation2d(Units.feetToMeters(54), Units.feetToMeters(10)), new Rotation2d(0.0));
+  // See
+  // https://firstfrc.blob.core.windows.net/frc2020/PlayingField/2020FieldDrawing-SeasonSpecific.pdf
+  // page 208
+  public static final double targetWidth = Units.inchesToMeters(41.30) - Units.inchesToMeters(6.70); // meters
+
+  // See
+  // https://firstfrc.blob.core.windows.net/frc2020/PlayingField/2020FieldDrawing-SeasonSpecific.pdf
+  // page 197
+  public static final double targetHeight = Units.inchesToMeters(98.19) - Units.inchesToMeters(81.19); // meters
+  public static final double targetHeightAboveGround = Units.inchesToMeters(81.19); // meters
+  
+  // See https://firstfrc.blob.core.windows.net/frc2020/PlayingField/LayoutandMarkingDiagram.pdf pages 4 and 5
+  public static final double kFarTgtXPos = Units.feetToMeters(54);
+  public static final double kFarTgtYPos = Units.feetToMeters(27 / 2) - Units.inchesToMeters(43.75) - Units.inchesToMeters(48.0 / 2.0);
+  public static final Pose2d kFarTargetPose = new Pose2d(new Translation2d(kFarTgtXPos, kFarTgtYPos), new Rotation2d(0.0));
+
   public static final SimVisionTarget kFarTarget = new SimVisionTarget(kFarTargetPose, targetHeightAboveGround,
       targetWidth, targetHeight);
 

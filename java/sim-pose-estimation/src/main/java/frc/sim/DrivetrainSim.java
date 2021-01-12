@@ -49,7 +49,7 @@ public class DrivetrainSim {
     // Configure these to match your PhotonVision Camera,
     // pipeline, and LED setup.
     double camDiagFOV = 75.0; // degrees
-    double camPitch = 0.0; // degrees
+    double camPitch = 15.0; // degrees
     double camHeightOffGround = 0.85; // meters
     double maxLEDRange = 20; // meters
     int camResolutionWidth = 640; // pixels
