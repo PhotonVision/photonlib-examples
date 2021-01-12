@@ -46,7 +46,7 @@ public class DrivetrainSim {
     // Simulated Vision System.
     // Configure these to match your PhotonVision Camera,
     // pipeline, and LED setup.
-    double camDiagFOV = 150.0; // degrees
+    double camDiagFOV = 170.0; // degrees - assume wide-angle camera
     double camPitch = Units.radiansToDegrees(Robot.CAMERA_PITCH_RADIANS); // degrees
     double camHeightOffGround = Robot.CAMERA_HEIGHT_METERS; // meters
     double maxLEDRange = 20; // meters
@@ -57,10 +57,14 @@ public class DrivetrainSim {
     SimVisionSystem simVision = new SimVisionSystem("photonvision", camDiagFOV, camPitch, new Transform2d(),
             camHeightOffGround, maxLEDRange, camResolutionWidth, camResolutionHeight, minTargetArea);
 
-    double targetWidth = 0.54; // meters
-    double targetHeight = 0.25; // meters
-    Pose2d farTargetPose = new Pose2d(
-        new Translation2d(Units.feetToMeters(54), Units.feetToMeters(10)), new Rotation2d(0.0));
+    // See https://firstfrc.blob.core.windows.net/frc2020/PlayingField/2020FieldDrawing-SeasonSpecific.pdf page 208
+    double targetWidth = Units.inchesToMeters(41.30) - Units.inchesToMeters(6.70); // meters
+    // See https://firstfrc.blob.core.windows.net/frc2020/PlayingField/2020FieldDrawing-SeasonSpecific.pdf page 197
+    double targetHeight = Units.inchesToMeters(98.19) - Units.inchesToMeters(81.19); // meters
+    // See https://firstfrc.blob.core.windows.net/frc2020/PlayingField/LayoutandMarkingDiagram.pdf pages 4 and 5
+    double tgtXPos = Units.feetToMeters(54);
+    double tgtYPos = Units.feetToMeters(27/2) - Units.inchesToMeters(43.75) - Units.inchesToMeters(48.0/2.0) ;
+    Pose2d farTargetPose = new Pose2d(new Translation2d(tgtXPos, tgtYPos), new Rotation2d(0.0));
 
 
     Field2d field = new Field2d();

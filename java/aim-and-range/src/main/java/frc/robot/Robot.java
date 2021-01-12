@@ -37,11 +37,13 @@ import frc.robot.sim.DrivetrainSim;
  * project.
  */
 public class Robot extends TimedRobot {
-   // Constants such as camera and target height stored. Change per robot and goal!
-   static public final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(24);
-   static public final double TARGET_HEIGHT_METERS = Units.feetToMeters(5);
-   // Angle between horizontal and the camera.
-   static public final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0);
+
+   // 2020 High goal target height above ground
+   static public final double TARGET_HEIGHT_METERS = Units.inchesToMeters(81.19);
+
+   // Constants about how your camera is mounted to the robot
+   static public final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(15); // Angle "up" from horizontal
+   static public final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(24);   // Height above floor
 
    // How far from the target we want to be
    final double GOAL_RANGE_METERS = Units.feetToMeters(10);
