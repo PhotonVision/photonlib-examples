@@ -60,12 +60,12 @@ public class DrivetrainPoseEstimator {
         leftDist, rightDist);
 
         var res = cam.getLatestResult();   
-        if(res.hasTargets()){
-            double imageCaptureTime = Timer.getFPGATimestamp() - res.getLatencyMillis();
-            Transform2d camToTargetTrans = res.getBestTarget().getCameraToTarget();
-            Pose2d camPose = Constants.kFarTargetPose.transformBy(camToTargetTrans.inverse());
-            m_poseEstimator.addVisionMeasurement( camPose.transformBy(Constants.kCameraToRobot), imageCaptureTime);
-        }
+        //if(res.hasTargets()){
+        //    double imageCaptureTime = Timer.getFPGATimestamp() - res.getLatencyMillis();
+        //    Transform2d camToTargetTrans = res.getBestTarget().getCameraToTarget();
+        //    Pose2d camPose = Constants.kFarTargetPose.transformBy(camToTargetTrans.inverse());
+        //    m_poseEstimator.addVisionMeasurement( camPose.transformBy(Constants.kCameraToRobot), imageCaptureTime);
+        //}
     }
 
     /**
